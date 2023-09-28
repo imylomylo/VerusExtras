@@ -2,6 +2,7 @@ const verusRpc = require('./verus-rpc');
 const transactionHash = 'your-transaction-hash-here';
 const address = 'your-address-here';
 const addressToDefrag = 'your-address-here';
+const N = 100; // Replace with the desired number of blocks to scan
 
 // Usage examples for transaction-related methods
 verusRpc.getRawTransaction(transactionHash)
@@ -26,6 +27,14 @@ verusRpc.getAddressUtxos(address)
   });
 
 verusRpc.defragUtxos(addressToDefrag)
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+
+verusRpc.ratioStakingMiningNBlocks(N)
   .then((res) => {
     console.log(res);
   })
