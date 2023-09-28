@@ -70,8 +70,44 @@ async function getAddressUtxos(address) {
   }
 }
 
+// Function to check identity-related information
+async function checkIdentityInformation(names) {
+  try {
+    for (const name of names) {
+      const nameWithoutSuffix = name.replace(/@$/, ''); // Remove '@' suffix
+      const response = await makeRpcCall('getidentity', [`${nameWithoutSuffix}@`]);
+      const id = response.identity;
+
+      if (!id) {
+        console.log(`${name}@ ID not registered`);
+        continue;
+      }
+
+      const timelock = id.timelock;
+      const flags = id.flags;
+
+      if (flagCheck(flags, FLAG_DELAYLOCK)) {
+        console.log(`${name}@ Delay lock of ${timelock + 20} blocks active.`);
+      } else if (flagCheck(flags, FLAG_REVOKE)) {
+        console.log(`${name}@ Is Revoked.`);
+      } else {
+        const blockHeight = await makeRpcCall('getblockcount');
+        if (timelock > blockHeight) {
+          console.log(`${name}@ Timelock unlocks in ${timelock - blockHeight} blocks.`);
+        } else {
+          console.log(`${name}@ Unlocked.`);
+        }
+      }
+    }
+  } catch (error) {
+    // Handle errors here
+    throw error;
+  }
+}
+
 module.exports = {
   getRawTransaction,
   decodeRawTransaction,
   getAddressUtxos,
+  checkIdentityInformation,
 };
