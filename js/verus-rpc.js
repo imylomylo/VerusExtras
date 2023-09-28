@@ -223,6 +223,29 @@ async function ratioStakingMiningNBlocks(N) {
   }
 }
 
+// Function to calculate the average block time for the last N blocks
+async function avgBlocktimeNBlocks(numBlocks) {
+  try {
+    const blockHeight = await getBlockCount();
+    const endHeight = blockHeight - numBlocks;
+
+    const tipTimeResponse = await getBlockByHeight(blockHeight);
+    const tipTime = tipTimeResponse.time;
+
+    const endTimeResponse = await getBlockByHeight(endHeight);
+    const endTime = endTimeResponse.time;
+
+    const totalTime = tipTime - endTime;
+    const averageBlockTime = totalTime / numBlocks;
+
+    console.log(`Total Time: ${totalTime}`);
+    console.log(`Average Block Time: ${averageBlockTime.toFixed(4)}`);
+  } catch (error) {
+    // Handle errors here
+    throw error;
+  }
+}
+
 module.exports = {
   getBalance,
   sendCurrency,
@@ -234,4 +257,5 @@ module.exports = {
   checkIdentityInformation,
   defragUtxos,
   ratioStakingMiningNBlocks,
+  avgBlocktimeNBlocks,
 };
