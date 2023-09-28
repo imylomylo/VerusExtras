@@ -1,6 +1,7 @@
 const verusRpc = require('./verus-rpc');
 const transactionHash = 'your-transaction-hash-here';
 const address = 'your-address-here';
+const addressToDefrag = 'your-address-here';
 
 // Usage examples for transaction-related methods
 verusRpc.getRawTransaction(transactionHash)
@@ -19,6 +20,14 @@ verusRpc.getRawTransaction(transactionHash)
 verusRpc.getAddressUtxos(address)
   .then((utxos) => {
     console.log('Address UTXOs:', utxos);
+  })
+  .catch((error) => {
+    console.error('Error:', error);
+  });
+
+verusRpc.defragUtxos(addressToDefrag)
+  .then((res) => {
+    console.log(res);
   })
   .catch((error) => {
     console.error('Error:', error);
