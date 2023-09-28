@@ -36,6 +36,28 @@ async function makeRpcCall(method, params) {
   }
 }
 
+// Function to call z_getbalance
+async function getBalance(address) {
+  try {
+    const balance = await makeRpcCall('z_getbalance', [address]);
+    return parseFloat(balance); // Convert balance to a float
+  } catch (error) {
+    // Handle errors here
+    throw error;
+  }
+}
+
+// Function to send currency to a list of destinations
+async function sendCurrency(address, destinations) {
+  try {
+    const response = await makeRpcCall('sendcurrency', [address, destinations]);
+    return response;
+  } catch (error) {
+    // Handle errors here
+    throw error;
+  }
+}
+
 // Function to call getrawtransaction
 async function getRawTransaction(txid) {
   try {
@@ -109,9 +131,44 @@ async function checkIdentityInformation(names) {
   }
 }
 
+// Function to defragment UTXOs
+async function defragUtxos(address, chunk = 5000) {
+  try {
+    const balance = await getBalance(address);
+    const amount = balance - config.DEFAULT_FEE;
+    const chunks = Math.floor(amount / chunk);
+    const remainder = (amount - chunks * chunk).toFixed(8);
+
+    console.log(`Address: ${address}`);
+    console.log(`Breaking balance of ${balance} into ${chunks} of ${chunk} plus ${remainder}`);
+    console.log();
+
+    const destinations = [];
+
+    for (let i = 0; i < chunks; i++) {
+      destinations.push({ address: address, amount: chunk });
+    }
+
+    if (remainder > 0) {
+      destinations.push({ address: address, amount: parseFloat(remainder) });
+    }
+
+    console.log(`Running: verus sendcurrency ${address} ${JSON.stringify(destinations)}`);
+    console.log();
+
+    const result = await sendCurrency(address, destinations);
+    console.log(result); // Output the result of the sendcurrency RPC call
+  } catch (error) {
+    // Handle errors here
+    console.error('Error:', error);
+  }
+}
 module.exports = {
+  getBalance,
+  sendCurrency,
   getRawTransaction,
   decodeRawTransaction,
   getAddressUtxos,
   checkIdentityInformation,
+  defragUtxos,
 };
