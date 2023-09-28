@@ -3,6 +3,7 @@ const transactionHash = 'your-transaction-hash-here';
 const address = 'your-address-here';
 const addressToDefrag = 'your-address-here';
 const N = 100; // Replace with the desired number of blocks to scan
+const numBlocks = 100; // Replace with the desired number of blocks
 
 // Usage examples for transaction-related methods
 verusRpc.getRawTransaction(transactionHash)
@@ -41,3 +42,5 @@ verusRpc.ratioStakingMiningNBlocks(N)
   .catch((error) => {
     console.error('Error:', error);
   });
+
+verusRpc.avgBlocktimeNBlocks(numBlocks);
