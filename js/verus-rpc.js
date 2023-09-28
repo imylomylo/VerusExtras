@@ -1,5 +1,8 @@
 const axios = require('axios');
 const config = require('./config'); // Import the config.js file
+// Constants for flag values
+const FLAG_REVOKE = 0x8000;
+const FLAG_DELAYLOCK = 0x02;
 
 // Function to make a remote RPC call
 async function makeRpcCall(method, params) {
@@ -71,6 +74,7 @@ async function getAddressUtxos(address) {
 }
 
 // Function to check identity-related information
+// from valutcheck.sh
 async function checkIdentityInformation(names) {
   try {
     for (const name of names) {
