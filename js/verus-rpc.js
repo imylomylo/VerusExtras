@@ -3,6 +3,9 @@ const config = require('./config'); // Import the config.js file
 // Constants for flag values
 const FLAG_REVOKE = 0x8000;
 const FLAG_DELAYLOCK = 0x02;
+// Constants for block types
+const BLOCK_MINED = 'mined';
+const BLOCK_MINTED = 'minted';
 
 // Function to make a remote RPC call
 async function makeRpcCall(method, params) {
@@ -30,6 +33,28 @@ async function makeRpcCall(method, params) {
 
     // Return the RPC response data
     return response.data;
+  } catch (error) {
+    // Handle errors here
+    throw error;
+  }
+}
+
+// Function to get block count
+async function getBlockCount() {
+  try {
+    const blockCount = await makeRpcCall('getblockcount');
+    return blockCount;
+  } catch (error) {
+    // Handle errors here
+    throw error;
+  }
+}
+
+// Function to get block by height
+async function getBlockByHeight(height) {
+  try {
+    const block = await makeRpcCall('getblock', [height]);
+    return block;
   } catch (error) {
     // Handle errors here
     throw error;
@@ -163,12 +188,50 @@ async function defragUtxos(address, chunk = 5000) {
     console.error('Error:', error);
   }
 }
+// Function to calculate the ratio of staking and mining blocks in the last N blocks
+async function ratioStakingMiningNBlocks(N) {
+  try {
+    const blockCount = await getBlockCount();
+    const startHeight = blockCount - N + 1;
+
+    console.log(`Block count: ${blockCount}`);
+    console.log(`Scanning back to height: ${startHeight}`);
+    console.log();
+
+    let minedCount = 0;
+    let mintedCount = 0;
+
+    for (let height = startHeight; height <= blockCount; height++) {
+      const block = await getBlockByHeight(height);
+      const blockType = block.blocktype;
+      console.log(`${height}: ${blockType}`);
+
+      if (blockType === BLOCK_MINED) {
+        minedCount++;
+      } else if (blockType === BLOCK_MINTED) {
+        mintedCount++;
+      }
+    }
+
+    console.log(`Mined: ${minedCount} of ${N}`);
+    console.log(`Minted: ${mintedCount} of ${N}`);
+    console.log(`Mined Percent: ${(100 * minedCount / N).toFixed(2)}%`);
+    console.log(`Minted Percent: ${(100 * mintedCount / N).toFixed(2)}%`);
+  } catch (error) {
+    // Handle errors here
+    console.error('Error:', error);
+  }
+}
+
 module.exports = {
   getBalance,
   sendCurrency,
+  getBlockCount,
+  getBlockByHeight,
   getRawTransaction,
   decodeRawTransaction,
   getAddressUtxos,
   checkIdentityInformation,
   defragUtxos,
+  ratioStakingMiningNBlocks,
 };
